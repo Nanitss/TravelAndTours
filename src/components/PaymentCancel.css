@@ -1,0 +1,167 @@
+/* Payment Cancel Page Styles */
+.payment-cancel-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  padding: 20px;
+}
+
+.cancel-content {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.cancel-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: #dc2626;
+  animation: cancelShake 0.5s ease-out;
+}
+
+@keyframes cancelShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+p {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.cancel-details {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.cancel-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cancel-details li {
+  padding: 8px 0;
+  color: #6b7280;
+  position: relative;
+  padding-left: 20px;
+}
+
+.cancel-details li::before {
+  content: "•";
+  color: #dc2626;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.primary-btn,
+.secondary-btn {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.secondary-btn {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.secondary-btn:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.help-message {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.help-message p {
+  color: #64748b;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .payment-cancel-container {
+    padding: 10px;
+  }
+  
+  .cancel-content {
+    padding: 24px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .primary-btn,
+  .secondary-btn {
+    flex: none;
+  }
+}

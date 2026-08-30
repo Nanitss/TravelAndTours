@@ -1,0 +1,50 @@
+import { initializeSampleData } from './firebaseService';
+
+// Function to initialize Firebase collections with sample data
+export async function initializeFirebaseCollections() {
+  try {
+    console.log('🚀 Initializing Firebase collections...');
+    await initializeSampleData();
+    console.log('✅ Firebase collections initialized successfully!');
+    
+    // Log what was created
+    console.log('\n📊 Collections created:');
+    console.log('• users - User profiles and information');
+    console.log('• tours - Tour packages and itineraries');
+    console.log('• bookings - User bookings and reservations');
+    console.log('• destinations - Travel destinations and information');
+    
+    console.log('\n🎯 Sample data includes:');
+    console.log('• 5 destinations (Bali, Tokyo, Boracay, Mount Fuji, New York)');
+    console.log('• 5 tour packages with different durations and prices');
+    console.log('• Ready for user registrations and bookings');
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Error initializing Firebase collections:', error);
+    throw error;
+  }
+}
+
+// Function to check if collections exist and have data
+export async function checkFirebaseStatus() {
+  try {
+    const { TourService, DestinationService } = await import('./firebaseService');
+    
+    const tours = await TourService.getAllTours();
+    const destinations = await DestinationService.getAllDestinations();
+    
+    console.log('📈 Firebase Status:');
+    console.log(`• Tours: ${tours.length} documents`);
+    console.log(`• Destinations: ${destinations.length} documents`);
+    
+    return {
+      tours: tours.length,
+      destinations: destinations.length,
+      isInitialized: tours.length > 0 && destinations.length > 0
+    };
+  } catch (error) {
+    console.error('❌ Error checking Firebase status:', error);
+    throw error;
+  }
+}

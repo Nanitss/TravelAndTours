@@ -1,0 +1,391 @@
+/* Admin Layout Styles - Matching Your Design Specifications */
+
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Reset any conflicting styles */
+.admin-layout * {
+  box-sizing: border-box;
+}
+
+/* Header Styles */
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 80px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-main {
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.logo-subtitle {
+  font-size: 10px;
+  opacity: 0.8;
+  letter-spacing: 1px;
+}
+
+.header-center {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 40px;
+}
+
+.search-container {
+  width: 100%;
+}
+
+.search-bar {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: none;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.action-icon {
+  font-size: 18px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(220, 53, 69, 0.9);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.05);
+}
+
+.logout-icon {
+  font-size: 16px;
+}
+
+.logout-text {
+  font-weight: 500;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-section:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.user-email {
+  font-size: 12px;
+  opacity: 0.8;
+  line-height: 1.2;
+}
+
+.dropdown-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+/* Navigation Styles */
+.admin-navigation {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.nav-button:hover {
+  color: #495057;
+  background: #f8f9fa;
+}
+
+.nav-button.active {
+  color: #667eea;
+  background: #f8f9fa;
+  border-bottom-color: #667eea;
+}
+
+.nav-icon {
+  font-size: 16px;
+}
+
+.nav-text {
+  font-weight: 500;
+}
+
+/* Main Content */
+.admin-content {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 140px);
+}
+
+/* User Dropdown */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 30px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  min-width: 200px;
+  margin-top: 5px;
+  border: 1px solid #e9ecef;
+}
+
+.dropdown-content {
+  padding: 10px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #495057;
+}
+
+.dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.dropdown-icon {
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 15px 20px;
+  }
+  
+  .header-center {
+    margin: 0 20px;
+  }
+  
+  .nav-container {
+    padding: 0 20px;
+    overflow-x: auto;
+  }
+  
+  .nav-button {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+  
+  .admin-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-section {
+    gap: 10px;
+  }
+  
+  .logo-main {
+    font-size: 20px;
+  }
+  
+  .logo-subtitle {
+    font-size: 9px;
+  }
+  
+  .search-input {
+    padding: 10px 12px 10px 40px;
+    font-size: 13px;
+  }
+  
+  .user-section {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  
+  .user-name {
+    font-size: 13px;
+  }
+  
+  .user-email {
+    font-size: 11px;
+  }
+}

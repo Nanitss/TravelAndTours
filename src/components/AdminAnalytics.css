@@ -1,0 +1,480 @@
+.analytics-page {
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.export-actions {
+  display: flex !important;
+  gap: 0.75rem;
+  align-items: center;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 999 !important;
+}
+
+.export-actions .action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  background: #28a745 !important;
+  color: white !important;
+  border: 2px solid #28a745 !important;
+  padding: 2rem 8rem !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  transition: all 0.3s ease !important;
+  min-width: 160px !important;
+  white-space: nowrap !important;
+}
+
+.export-actions .action-btn:hover {
+  background: #218838 !important;
+  transform: translateY(-2px);
+}
+
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.action-btn:hover {
+  background: #f8f9fa;
+  border-color: #20b2aa;
+  color: #20b2aa;
+}
+
+/* Analytics Grid */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.analytics-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  background: #20b2aa;
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.metric-trend {
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.metric-trend.positive {
+  color: #28a745;
+}
+
+.metric-trend.negative {
+  color: #dc3545;
+}
+
+/* Charts Section */
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chart-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e1e5e9;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s;
+}
+
+.chart-btn:hover {
+  background: #f8f9fa;
+  border-color: #20b2aa;
+  color: #20b2aa;
+}
+
+.chart-btn.active {
+  background: #20b2aa;
+  color: white;
+  border-color: #20b2aa;
+}
+
+.chart-content {
+  height: 250px;
+  position: relative;
+}
+
+.mock-line-chart {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #20b2aa;
+  transform: translateY(-50%);
+}
+
+.chart-points {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.point {
+  width: 8px;
+  height: 8px;
+  background: #20b2aa;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Demographics Chart */
+.demographics-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  padding: 1rem 0;
+}
+
+.demo-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.demo-label {
+  width: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.demo-bar {
+  flex: 1;
+  height: 20px;
+  background: #f1f3f4;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.demo-fill {
+  height: 100%;
+  background: #20b2aa;
+  border-radius: 10px;
+  transition: width 0.3s;
+}
+
+.demo-percentage {
+  width: 40px;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Top Pages */
+.top-pages {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+}
+
+.top-pages h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+}
+
+.pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.page-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.page-item:hover {
+  background: #e9ecef;
+}
+
+.page-rank {
+  width: 32px;
+  height: 32px;
+  background: #20b2aa;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.page-info {
+  flex: 1;
+}
+
+.page-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.page-url {
+  font-size: 0.8rem;
+  color: #666;
+  font-family: 'Courier New', monospace;
+}
+
+.page-stats {
+  text-align: right;
+}
+
+.page-views {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.page-conversion {
+  font-size: 0.8rem;
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-content {
+    height: 200px;
+  }
+  
+  .page-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .page-stats {
+    text-align: center;
+  }
+}
+
+/* Loading and No Data States */
+.loading-chart,
+.loading-packages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-chart p,
+.loading-packages p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.no-data-chart,
+.no-packages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-data-chart p,
+.no-packages p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.no-data-chart small,
+.no-packages small {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
