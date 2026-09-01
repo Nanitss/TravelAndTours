@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { RatingService, Rating } from '../utils/firebaseService';
+import { RatingService, Rating } from '../utils/supabaseService';
 import StarRating from './StarRating';
 import './AdminRatings.css';
 

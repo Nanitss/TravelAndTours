@@ -1,4 +1,4 @@
-import { BookingService } from './firebaseService';
+import { BookingService } from './supabaseService';
 
 export class BookingChecker {
   private static readonly CHECK_INTERVAL = 1000 * 60 * 30; // Check every 30 minutes

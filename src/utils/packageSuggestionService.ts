@@ -1,5 +1,5 @@
-import { Tour } from './firebaseService';
-import { TourService } from './firebaseService';
+import { Tour } from './supabaseService';
+import { TourService } from './supabaseService';
 
 export interface ItineraryFormData {
   arrival: string;

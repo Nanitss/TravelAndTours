@@ -1,4 +1,4 @@
-import { TourService } from './firebaseService';
+import { TourService } from './supabaseService';
 
 export interface PackageData {
   title: string;

@@ -1,4 +1,4 @@
-import { PaymentService, BookingService } from './firebaseService';
+import { PaymentService, BookingService } from './supabaseService';
 
 // Webhook event types from PayMongo
 export interface PayMongoWebhookEvent {

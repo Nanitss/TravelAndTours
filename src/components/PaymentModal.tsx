@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PaymentService, PaymentMethod, formatAmount, getPaymentMethodDisplayName, getPaymentMethodIcon } from '../utils/paymentService';
-import { BookingService, ActivityService, PaymentService as FirebasePaymentService, SalesService } from '../utils/firebaseService';
+import { BookingService, ActivityService, PaymentService as FirebasePaymentService, SalesService } from '../utils/supabaseService';
 import { useAuth } from '../contexts/AuthContext';
 import './PaymentModal.css';
 

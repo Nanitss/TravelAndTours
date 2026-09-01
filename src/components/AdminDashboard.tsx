@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookingService, TourService, UserService, ActivityService, Booking, Tour, User, RecentActivity } from '../utils/firebaseService';
+import { BookingService, TourService, UserService, ActivityService, Booking, Tour, User, RecentActivity } from '../utils/supabaseService';
 import { PDFExporter } from '../utils/pdfExport';
 import './AdminDashboard.css';
 

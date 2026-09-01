@@ -1,4 +1,4 @@
-import { initializeSampleData } from './firebaseService';
+import { initializeSampleData } from './supabaseService';
 import { CustomAuthService } from './customAuth';
 
 export async function createSampleData() {
@@ -36,7 +36,7 @@ export async function createSampleData() {
       console.log('⚠️ Client account creation failed');
     }
     
-    // Initialize Firebase collections with sample data
+    // Initialize Supabase tables with sample data
     console.log('Creating sample tours and destinations...');
     await initializeSampleData();
     

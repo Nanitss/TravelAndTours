@@ -1,14 +1,14 @@
-import { initializeSampleData } from './firebaseService';
+import { initializeSampleData, TourService, DestinationService } from './supabaseService';
 
-// Function to initialize Firebase collections with sample data
-export async function initializeFirebaseCollections() {
+// Function to initialize Supabase tables with sample data
+export async function initializeSupabaseData() {
   try {
-    console.log('🚀 Initializing Firebase collections...');
+    console.log('🚀 Initializing Supabase tables...');
     await initializeSampleData();
-    console.log('✅ Firebase collections initialized successfully!');
+    console.log('✅ Supabase tables initialized successfully!');
     
     // Log what was created
-    console.log('\n📊 Collections created:');
+    console.log('\n📊 Tables populated:');
     console.log('• users - User profiles and information');
     console.log('• tours - Tour packages and itineraries');
     console.log('• bookings - User bookings and reservations');
@@ -21,22 +21,20 @@ export async function initializeFirebaseCollections() {
     
     return true;
   } catch (error) {
-    console.error('❌ Error initializing Firebase collections:', error);
+    console.error('❌ Error initializing Supabase tables:', error);
     throw error;
   }
 }
 
-// Function to check if collections exist and have data
-export async function checkFirebaseStatus() {
+// Function to check if tables exist and have data
+export async function checkSupabaseStatus() {
   try {
-    const { TourService, DestinationService } = await import('./firebaseService');
-    
     const tours = await TourService.getAllTours();
     const destinations = await DestinationService.getAllDestinations();
     
-    console.log('📈 Firebase Status:');
-    console.log(`• Tours: ${tours.length} documents`);
-    console.log(`• Destinations: ${destinations.length} documents`);
+    console.log('📈 Supabase Status:');
+    console.log(`• Tours: ${tours.length} rows`);
+    console.log(`• Destinations: ${destinations.length} rows`);
     
     return {
       tours: tours.length,
@@ -44,7 +42,7 @@ export async function checkFirebaseStatus() {
       isInitialized: tours.length > 0 && destinations.length > 0
     };
   } catch (error) {
-    console.error('❌ Error checking Firebase status:', error);
+    console.error('❌ Error checking Supabase status:', error);
     throw error;
   }
 }

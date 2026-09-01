@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Tour, TourService, BookingService, ActivityService, DateAvailabilityService } from '../utils/firebaseService';
+import { Tour, TourService, BookingService, ActivityService, DateAvailabilityService } from '../utils/supabaseService';
 import ComprehensiveBookingModal from './ComprehensiveBookingModal';
 import './BookingPage.css';
 

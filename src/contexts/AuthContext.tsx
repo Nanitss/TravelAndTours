@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, UserRole } from '../utils/firebaseService';
+import { User, UserRole } from '../utils/supabaseService';
 import { CustomAuthService } from '../utils/customAuth';
 
 interface AuthContextType {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '../utils/firebaseService';
+import { UserRole } from '../utils/supabaseService';
 import './AuthModal.css';
 
 interface AuthModalProps {

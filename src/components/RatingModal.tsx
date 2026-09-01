@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RatingService } from '../utils/firebaseService';
+import { RatingService } from '../utils/supabaseService';
 import StarRating from './StarRating';
 import './RatingModal.css';
 

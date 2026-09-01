@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User, UserRole } from '../utils/firebaseService';
+import { User, UserRole } from '../utils/supabaseService';
 import './Header.css';
 
 interface HeaderProps {

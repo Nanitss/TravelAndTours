@@ -1,4 +1,4 @@
-import { Booking } from './firebaseService';
+import { Booking } from './supabaseService';
 
 // PayMongo API Configuration
 const PAYMONGO_CONFIG = {

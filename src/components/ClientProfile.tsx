@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User, BookingService, Booking, TourService, Tour, RatingService, Rating, PaymentService, Payment } from '../utils/firebaseService';
+import { User, BookingService, Booking, TourService, Tour, RatingService, Rating, PaymentService, Payment } from '../utils/supabaseService';
 import { CustomAuthService } from '../utils/customAuth';
 import RemainingPaymentModal from './RemainingPaymentModal';
 import RatingModal from './RatingModal';

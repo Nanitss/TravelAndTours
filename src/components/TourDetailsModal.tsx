@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tour } from '../utils/firebaseService';
+import { Tour } from '../utils/supabaseService';
 import './TourDetailsModal.css';
 
 interface TourDetailsModalProps {

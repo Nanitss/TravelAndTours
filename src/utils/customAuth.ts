@@ -1,4 +1,4 @@
-import { User, UserRole, UserService } from './firebaseService';
+import { User, UserRole, UserService } from './supabaseService';
 
 // Simple password hashing (in production, use bcrypt or similar)
 const hashPassword = (password: string): string => {
@@ -35,8 +35,6 @@ export class CustomAuthService {
 
       // Create new user
       const hashedPassword = hashPassword(password);
-      console.log('Original password:', password);
-      console.log('Hashed password for storage:', hashedPassword);
       const userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
         email,
         password: hashedPassword,
@@ -68,9 +66,8 @@ export class CustomAuthService {
     try {
       console.log('Attempting login for:', email);
       
-      // Find user by email (check both Email and email fields)
+      // Find user by email
       const user = await UserService.getUserByEmail(email);
-      console.log('User found:', user);
       
       if (!user) {
         console.log('No user found with email:', email);
@@ -82,16 +79,8 @@ export class CustomAuthService {
       const userPassword = user.Password || user.password;
       const userName = user.Username || user.name;
       
-      console.log('User email from DB:', userEmail);
-      console.log('User password from DB:', userPassword);
-      
       // Verify password
-      console.log('Input password:', password);
-      console.log('Stored password:', userPassword);
-      const hashedInput = hashPassword(password);
-      console.log('Hashed input password:', hashedInput);
       const isPasswordValid = verifyPassword(password, userPassword || '');
-      console.log('Password valid:', isPasswordValid);
       
       if (!isPasswordValid) {
         return { success: false, message: 'Invalid password' };
@@ -102,14 +91,12 @@ export class CustomAuthService {
         id: user.id,
         email: userEmail,
         name: userName,
-        role: user.role || UserRole.ADMIN, // Use the role from your Firestore (2 for admin)
+        role: user.role || UserRole.ADMIN,
         phone: user.phone,
         address: user.address,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
-      
-      console.log('Normalized user role:', normalizedUser.role);
       
       return { 
         success: true, 
@@ -200,13 +187,10 @@ export class CustomAuthService {
 
       // Hash the new password
       const hashedNewPassword = hashPassword(newPassword);
-      console.log('New password:', newPassword);
-      console.log('Hashed new password:', hashedNewPassword);
 
-      // Update the user's password in Firestore
+      // Update the user's password
       await UserService.updateUser(userId, { 
-        password: hashedNewPassword,
-        Password: hashedNewPassword // Update both fields for compatibility
+        password: hashedNewPassword
       });
 
       return { 

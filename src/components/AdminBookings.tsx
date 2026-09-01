@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Booking, BookingService, UserService } from '../utils/firebaseService';
+import { Booking, BookingService, UserService } from '../utils/supabaseService';
 import { PDFExporter } from '../utils/pdfExport';
 import './AdminBookings.css';
 

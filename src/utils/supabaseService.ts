@@ -1,20 +1,4 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  getDoc, 
-  getDocs, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit,
-  serverTimestamp,
-  DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
-import { db } from './firebase';
+import { supabase } from './supabase';
 
 // Role types
 export enum UserRole {
@@ -22,20 +6,20 @@ export enum UserRole {
   ADMIN = 2
 }
 
-// Types for our collections
+// Types for our tables
 export interface User {
   id?: string;
-  Email?: string; // Capital E to match your Firestore
-  email?: string; // Lowercase for compatibility
-  Password?: string; // Capital P to match your Firestore
-  password?: string; // Lowercase for compatibility
-  Username?: string; // Capital U to match your Firestore
-  name?: string; // Lowercase for compatibility
+  Email?: string;
+  email?: string;
+  Password?: string;
+  password?: string;
+  Username?: string;
+  name?: string;
   phone?: string;
   address?: string;
   gender?: string;
   dateOfBirth?: string;
-  role?: UserRole; // 1 = Client, 2 = Admin
+  role?: UserRole;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -45,11 +29,11 @@ export interface Tour {
   title: string;
   description: string;
   destination: string;
-  duration: number; // in days
+  duration: number;
   price: number;
   startDate: string;
   endDate: string;
-  availabilityUntil: string; // when the package stops being available
+  availabilityUntil: string;
   imageUrl?: string;
   isActive: boolean;
   maxParticipants?: number;
@@ -62,40 +46,36 @@ export interface Tour {
 
 export interface Booking {
   id?: string;
-  bookingId: string; // unique booking reference
+  bookingId: string;
   userId: string;
   tourId: string;
-  tourTitle: string; // store tour title for easier display
+  tourTitle: string;
   participants: number;
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'ongoing' | 'cancelled' | 'completed' | 'failed';
   bookingDate: string;
-  travelDate: string; // when they want to travel
-  departureDate?: string; // departure date for the trip
+  travelDate: string;
+  departureDate?: string;
   specialRequests?: string;
   customerName: string;
   customerEmail: string;
-  hasRescheduled?: boolean; // flag to track if user has already rescheduled
-  // Payment related fields
+  hasRescheduled?: boolean;
   paymentType: 'full' | 'partial';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   paymentMethod?: string;
   paymentIntentId?: string;
   transactionId?: string;
-  // Payment amounts
-  amountPaid: number; // actual amount received
-  amountRemaining: number; // amount still owed
-  dueDate?: string; // when remaining payment is due
-  paymentDate?: string; // when payment was completed
-  daysUntilDue?: number; // number of days until payment is due
-  // Refund fields
-  refundAmount?: number; // if refunded
-  refundDate?: string; // when refund was processed
-  // Booking management
-  isVoided?: boolean; // if booking was voided due to non-payment
-  voidReason?: string; // reason for voiding
-  voidDate?: string; // when booking was voided
-  rebookCount?: number; // how many times user has rescheduled (max 1)
+  amountPaid: number;
+  amountRemaining: number;
+  dueDate?: string;
+  paymentDate?: string;
+  daysUntilDue?: number;
+  refundAmount?: number;
+  refundDate?: string;
+  isVoided?: boolean;
+  voidReason?: string;
+  voidDate?: string;
+  rebookCount?: number;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -108,10 +88,10 @@ export interface Rating {
   userId: string;
   customerName: string;
   customerEmail: string;
-  rating: number; // 1-5 stars
-  comment?: string; // optional review text
+  rating: number;
+  comment?: string;
   createdAt: any;
-  travelDate: string; // when the trip was taken
+  travelDate: string;
 }
 
 export interface Destination {
@@ -134,545 +114,11 @@ export interface RecentActivity {
   description: string;
   timestamp: any;
   userId?: string;
-  relatedId?: string; // booking ID, package ID, etc.
+  relatedId?: string;
   createdAt?: any;
 }
 
-// Collection names
-const COLLECTIONS = {
-  USERS: 'Users', // Changed to match your Firestore collection name
-  TOURS: 'tours',
-  BOOKINGS: 'bookings',
-  DESTINATIONS: 'destinations',
-  ACTIVITIES: 'recent_activities',
-  PAYMENTS: 'payments',
-  SALES: 'sales',
-  DATE_AVAILABILITY: 'date_availability',
-  RATINGS: 'ratings'
-} as const;
-
-// Generic CRUD operations
-export class FirebaseService {
-  // Create a new document
-  static async create<T>(collectionName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    try {
-      const docRef = await addDoc(collection(db, collectionName), {
-      ...data,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return docRef.id;
-  } catch (error) {
-    console.error(`Error creating document in ${collectionName}:`, error);
-    throw error;
-  }
-}
-
-// Get a single document by ID
-static async getById<T>(collectionName: string, id: string): Promise<T | null> {
-  try {
-    const docRef = doc(db, collectionName, id);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as T;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error getting document from ${collectionName}:`, error);
-    throw error;
-  }
-}
-
-// Get all documents from a collection
-static async getAll<T>(collectionName: string): Promise<T[]> {
-  try {
-    const querySnapshot = await getDocs(collection(db, collectionName));
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...(doc.data() as any)
-    })) as T[];
-  } catch (error) {
-    console.error(`Error getting all documents from ${collectionName}:`, error);
-    throw error;
-  }
-}
-
-// Update a document
-  static async update<T>(collectionName: string, id: string, data: Partial<T>): Promise<void> {
-    try {
-      console.log(`🔄 Updating document in ${collectionName} with ID: ${id}`);
-      console.log(`🔄 Update data:`, data);
-      
-      const docRef = doc(db, collectionName, id);
-      const updateData = {
-        ...data,
-        updatedAt: serverTimestamp()
-      };
-      
-      console.log(`🔄 Final update data:`, updateData);
-      
-      await updateDoc(docRef, updateData);
-      
-      console.log(`✅ Successfully updated document in ${collectionName}`);
-    } catch (error) {
-      console.error(`❌ Error updating document in ${collectionName}:`, error);
-      throw error;
-    }
-  }
-
-// Delete a document
-static async delete(collectionName: string, id: string): Promise<void> {
-  try {
-    const docRef = doc(db, collectionName, id);
-    await deleteDoc(docRef);
-  } catch (error) {
-    console.error(`Error deleting document from ${collectionName}:`, error);
-    throw error;
-  }
-}
-
-// Query documents with conditions
-static async query<T>(
-  collectionName: string, 
-  conditions: Array<{ field: string; operator: any; value: any }>,
-  orderByField?: string,
-  orderDirection?: 'asc' | 'desc',
-  limitCount?: number
-): Promise<T[]> {
-  try {
-    console.log(`Querying ${collectionName} with conditions:`, conditions);
-    const collectionRef = collection(db, collectionName);
-    
-    // Start with where conditions
-    let q: any = collectionRef;
-    
-    // Apply where conditions
-    conditions.forEach(condition => {
-      q = query(q, where(condition.field, condition.operator, condition.value));
-    });
-    
-    // Apply ordering if specified
-    if (orderByField) {
-      q = query(q, orderBy(orderByField, orderDirection || 'asc'));
-    }
-    
-    // Apply limit if specified
-    if (limitCount) {
-      q = query(q, limit(limitCount));
-    }
-    
-    console.log('Executing Firestore query...');
-    const querySnapshot = await getDocs(q);
-    console.log('Query executed, found documents:', querySnapshot.docs.length);
-    
-    const results = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...(doc.data() as any)
-    })) as T[];
-    
-    console.log('Query results:', results);
-    return results;
-  } catch (error) {
-    console.error(`Error querying ${collectionName}:`, error);
-    throw error;
-  }
-}
-}
-
-// Specific service methods for each collection
-export class UserService {
-  static async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<User>(COLLECTIONS.USERS, userData);
-  }
-
-  static async getUserById(id: string): Promise<User | null> {
-    return FirebaseService.getById<User>(COLLECTIONS.USERS, id);
-  }
-
-  static async getAllUsers(): Promise<User[]> {
-    return FirebaseService.getAll<User>(COLLECTIONS.USERS);
-  }
-
-  static async updateUser(id: string, userData: Partial<User>): Promise<void> {
-    return FirebaseService.update<User>(COLLECTIONS.USERS, id, userData);
-  }
-
-  static async deleteUser(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.USERS, id);
-  }
-
-  static async getUserByEmail(email: string): Promise<User | null> {
-    try {
-      console.log('Searching for user with email:', email);
-      
-      // Try to find user with lowercase 'email' field first
-      let users = await FirebaseService.query<User>(
-        COLLECTIONS.USERS,
-        [{ field: 'email', operator: '==', value: email }]
-      );
-      
-      // If not found, try with uppercase 'Email' field
-      if (users.length === 0) {
-        console.log('Not found with lowercase email, trying uppercase Email...');
-        users = await FirebaseService.query<User>(
-          COLLECTIONS.USERS,
-          [{ field: 'Email', operator: '==', value: email }]
-        );
-      }
-      
-      // If still not found, try case-insensitive search by getting all users
-      if (users.length === 0) {
-        console.log('Not found with exact match, trying case-insensitive search...');
-        const allUsers = await FirebaseService.getAll<User>(COLLECTIONS.USERS);
-        console.log('All users in database:', allUsers);
-        
-        // Find user with case-insensitive email match
-        const foundUser = allUsers.find(user => {
-          const userEmail = user.Email || user.email;
-          return userEmail && userEmail.toLowerCase() === email.toLowerCase();
-        });
-        
-        if (foundUser) {
-          console.log('Found user with case-insensitive match:', foundUser);
-          return foundUser;
-        }
-      }
-      
-      console.log('Query result:', users);
-      return users.length > 0 ? users[0] : null;
-    } catch (error) {
-      console.error('Error in getUserByEmail:', error);
-      throw error;
-    }
-  }
-}
-
-export class TourService {
-  static async createTour(tourData: Omit<Tour, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Tour>(COLLECTIONS.TOURS, tourData);
-  }
-
-  static async getTourById(id: string): Promise<Tour | null> {
-    return FirebaseService.getById<Tour>(COLLECTIONS.TOURS, id);
-  }
-
-  static async getAllTours(): Promise<Tour[]> {
-    return FirebaseService.getAll<Tour>(COLLECTIONS.TOURS);
-  }
-
-  static async getActiveTours(): Promise<Tour[]> {
-    return FirebaseService.query<Tour>(
-      COLLECTIONS.TOURS,
-      [{ field: 'isActive', operator: '==', value: true }],
-      'startDate',
-      'asc'
-    );
-  }
-
-  static async getToursByDestination(destination: string): Promise<Tour[]> {
-    return FirebaseService.query<Tour>(
-      COLLECTIONS.TOURS,
-      [
-        { field: 'destination', operator: '==', value: destination },
-        { field: 'isActive', operator: '==', value: true }
-      ],
-      'startDate',
-      'asc'
-    );
-  }
-
-  static async updateTour(id: string, tourData: Partial<Tour>): Promise<void> {
-    return FirebaseService.update<Tour>(COLLECTIONS.TOURS, id, tourData);
-  }
-
-  static async deleteTour(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.TOURS, id);
-  }
-}
-
-export class BookingService {
-  static async createBooking(bookingData: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Booking>(COLLECTIONS.BOOKINGS, bookingData);
-  }
-
-  static async getBookingById(id: string): Promise<Booking | null> {
-    return FirebaseService.getById<Booking>(COLLECTIONS.BOOKINGS, id);
-  }
-
-  static async getAllBookings(): Promise<Booking[]> {
-    return FirebaseService.getAll<Booking>(COLLECTIONS.BOOKINGS);
-  }
-
-  static async getBookingsByUser(userId: string): Promise<Booking[]> {
-    return FirebaseService.query<Booking>(
-      COLLECTIONS.BOOKINGS,
-      [{ field: 'userId', operator: '==', value: userId }],
-      'bookingDate',
-      'desc'
-    );
-  }
-
-  static async getBookingsByTour(tourId: string): Promise<Booking[]> {
-    return FirebaseService.query<Booking>(
-      COLLECTIONS.BOOKINGS,
-      [{ field: 'tourId', operator: '==', value: tourId }],
-      'bookingDate',
-      'desc'
-    );
-  }
-
-  static async updateBooking(id: string, bookingData: Partial<Booking>): Promise<void> {
-    return FirebaseService.update<Booking>(COLLECTIONS.BOOKINGS, id, bookingData);
-  }
-
-  static async deleteBooking(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.BOOKINGS, id);
-  }
-}
-
-export class DestinationService {
-  static async createDestination(destinationData: Omit<Destination, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Destination>(COLLECTIONS.DESTINATIONS, destinationData);
-  }
-
-  static async getDestinationById(id: string): Promise<Destination | null> {
-    return FirebaseService.getById<Destination>(COLLECTIONS.DESTINATIONS, id);
-  }
-
-  static async getAllDestinations(): Promise<Destination[]> {
-    return FirebaseService.getAll<Destination>(COLLECTIONS.DESTINATIONS);
-  }
-
-  static async getDestinationsByCountry(country: string): Promise<Destination[]> {
-    return FirebaseService.query<Destination>(
-      COLLECTIONS.DESTINATIONS,
-      [{ field: 'country', operator: '==', value: country }]
-    );
-  }
-
-  static async updateDestination(id: string, destinationData: Partial<Destination>): Promise<void> {
-    return FirebaseService.update<Destination>(COLLECTIONS.DESTINATIONS, id, destinationData);
-  }
-
-  static async deleteDestination(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.DESTINATIONS, id);
-  }
-}
-
-export class ActivityService {
-  static async createActivity(activityData: Omit<RecentActivity, 'id' | 'createdAt'>): Promise<string> {
-    return FirebaseService.create<RecentActivity>(COLLECTIONS.ACTIVITIES, activityData);
-  }
-
-  static async getRecentActivities(limitCount: number = 10): Promise<RecentActivity[]> {
-    return FirebaseService.query<RecentActivity>(
-      COLLECTIONS.ACTIVITIES,
-      [],
-      'timestamp',
-      'desc',
-      limitCount
-    );
-  }
-
-  static async getActivitiesByType(type: RecentActivity['type']): Promise<RecentActivity[]> {
-    return FirebaseService.query<RecentActivity>(
-      COLLECTIONS.ACTIVITIES,
-      [{ field: 'type', operator: '==', value: type }],
-      'timestamp',
-      'desc'
-    );
-  }
-}
-
-// Payment Service for Firestore operations
-export class PaymentService {
-  static async createPayment(paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Payment>(COLLECTIONS.PAYMENTS, paymentData);
-  }
-
-  static async getPaymentById(id: string): Promise<Payment | null> {
-    return FirebaseService.getById<Payment>(COLLECTIONS.PAYMENTS, id);
-  }
-
-  static async getPaymentsByBooking(bookingId: string): Promise<Payment[]> {
-    return FirebaseService.query<Payment>(
-      COLLECTIONS.PAYMENTS,
-      [{ field: 'bookingId', operator: '==', value: bookingId }],
-      'createdAt',
-      'desc'
-    );
-  }
-
-  static async getPaymentsByUser(userId: string): Promise<Payment[]> {
-    return FirebaseService.query<Payment>(
-      COLLECTIONS.PAYMENTS,
-      [{ field: 'customerEmail', operator: '==', value: userId }]
-    );
-  }
-
-  static async getAllPayments(): Promise<Payment[]> {
-    return FirebaseService.getAll<Payment>(COLLECTIONS.PAYMENTS);
-  }
-
-  static async updatePayment(id: string, paymentData: Partial<Payment>): Promise<void> {
-    return FirebaseService.update<Payment>(COLLECTIONS.PAYMENTS, id, paymentData);
-  }
-
-  static async deletePayment(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.PAYMENTS, id);
-  }
-}
-
-// Sales Service for tracking sales and analytics
-export class SalesService {
-  static async createSalesRecord(salesData: Omit<SalesRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<SalesRecord>(COLLECTIONS.SALES, salesData);
-  }
-
-  static async getSalesRecordById(id: string): Promise<SalesRecord | null> {
-    return FirebaseService.getById<SalesRecord>(COLLECTIONS.SALES, id);
-  }
-
-  static async getAllSales(): Promise<SalesRecord[]> {
-    return FirebaseService.getAll<SalesRecord>(COLLECTIONS.SALES);
-  }
-
-  static async getSalesByDateRange(startDate: string, endDate: string): Promise<SalesRecord[]> {
-    return FirebaseService.query<SalesRecord>(
-      COLLECTIONS.SALES,
-      [
-        { field: 'paymentDate', operator: '>=', value: startDate },
-        { field: 'paymentDate', operator: '<=', value: endDate }
-      ],
-      'paymentDate',
-      'desc'
-    );
-  }
-
-  static async getSalesByTour(tourId: string): Promise<SalesRecord[]> {
-    return FirebaseService.query<SalesRecord>(
-      COLLECTIONS.SALES,
-      [{ field: 'tourId', operator: '==', value: tourId }],
-      'paymentDate',
-      'desc'
-    );
-  }
-
-  static async getTotalSales(): Promise<number> {
-    const sales = await this.getAllSales();
-    return sales
-      .filter(sale => sale.paymentStatus === 'paid')
-      .reduce((total, sale) => total + sale.amount, 0);
-  }
-
-  static async getSalesByPaymentMethod(): Promise<{ [key: string]: number }> {
-    const sales = await this.getAllSales();
-    const salesByMethod: { [key: string]: number } = {};
-    
-    sales
-      .filter(sale => sale.paymentStatus === 'paid')
-      .forEach(sale => {
-        salesByMethod[sale.paymentMethod] = (salesByMethod[sale.paymentMethod] || 0) + sale.amount;
-      });
-    
-    return salesByMethod;
-  }
-
-  static async getAllSalesRecords(): Promise<SalesRecord[]> {
-    return FirebaseService.getAll<SalesRecord>(COLLECTIONS.SALES);
-  }
-
-  static async updateSalesRecord(id: string, salesData: Partial<SalesRecord>): Promise<void> {
-    return FirebaseService.update<SalesRecord>(COLLECTIONS.SALES, id, salesData);
-  }
-
-  static async deleteSalesRecord(id: string): Promise<void> {
-    return FirebaseService.delete(COLLECTIONS.SALES, id);
-  }
-}
-
-export class DateAvailabilityService {
-  static async checkDateAvailability(tourId: string, date: string): Promise<boolean> {
-    try {
-      const availability = await FirebaseService.query<DateAvailability>(
-        COLLECTIONS.DATE_AVAILABILITY,
-        [
-          { field: 'tourId', operator: '==', value: tourId },
-          { field: 'date', operator: '==', value: date }
-        ]
-      );
-      
-      // If no record exists, date is available
-      if (availability.length === 0) {
-        return true;
-      }
-      
-      // Check if any record shows the date as available
-      return availability.some(record => record.isAvailable && record.status === 'available');
-    } catch (error) {
-      console.error('Error checking date availability:', error);
-      return false; // Default to unavailable if error
-    }
-  }
-
-  static async bookDate(tourId: string, date: string, bookingId: string, userId: string): Promise<string> {
-    const availabilityData: Omit<DateAvailability, 'id' | 'createdAt' | 'updatedAt'> = {
-      tourId,
-      date,
-      isAvailable: false,
-      bookingId,
-      userId,
-      status: 'booked'
-    };
-    
-    return FirebaseService.create<DateAvailability>(COLLECTIONS.DATE_AVAILABILITY, availabilityData);
-  }
-
-  static async releaseDate(tourId: string, date: string): Promise<void> {
-    try {
-      const availability = await FirebaseService.query<DateAvailability>(
-        COLLECTIONS.DATE_AVAILABILITY,
-        [
-          { field: 'tourId', operator: '==', value: tourId },
-          { field: 'date', operator: '==', value: date }
-        ]
-      );
-      
-      // Delete the availability record to make date available again
-      for (const record of availability) {
-        if (record.id) {
-          await FirebaseService.delete(COLLECTIONS.DATE_AVAILABILITY, record.id);
-        }
-      }
-    } catch (error) {
-      console.error('Error releasing date:', error);
-    }
-  }
-
-  static async getBookedDatesForTour(tourId: string): Promise<DateAvailability[]> {
-    return FirebaseService.query<DateAvailability>(
-      COLLECTIONS.DATE_AVAILABILITY,
-      [
-        { field: 'tourId', operator: '==', value: tourId },
-        { field: 'status', operator: '==', value: 'booked' }
-      ]
-    );
-  }
-
-  static async getBookedDatesForUser(userId: string): Promise<DateAvailability[]> {
-    return FirebaseService.query<DateAvailability>(
-      COLLECTIONS.DATE_AVAILABILITY,
-      [
-        { field: 'userId', operator: '==', value: userId },
-        { field: 'status', operator: '==', value: 'booked' }
-      ]
-    );
-  }
-}
-
-// Payment Interface for Firestore
+// Payment Interface
 export interface Payment {
   id?: string;
   paymentIntentId: string;
@@ -684,12 +130,10 @@ export interface Payment {
   paymongoPaymentId?: string;
   customerEmail: string;
   customerName: string;
-  // Additional payment tracking
   transactionId?: string;
-  gatewayResponse?: any; // Store full PayMongo response
+  gatewayResponse?: any;
   failureReason?: string;
   processedAt?: string;
-  // New fields for partial payment system
   paymentType?: 'initial' | 'remaining' | 'full';
   paymentNumber?: number;
   isPartialPayment?: boolean;
@@ -731,8 +175,8 @@ export interface SalesRecord {
   paymentStatus: 'paid' | 'refunded';
   bookingDate: string;
   paymentDate: string;
-  commission?: number; // if you have commission tracking
-  netAmount: number; // amount after any deductions
+  commission?: number;
+  netAmount: number;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -741,13 +185,575 @@ export interface SalesRecord {
 export interface DateAvailability {
   id?: string;
   tourId: string;
-  date: string; // YYYY-MM-DD format
+  date: string;
   isAvailable: boolean;
-  bookingId?: string; // if booked, which booking
-  userId?: string; // who booked it
+  bookingId?: string;
+  userId?: string;
   status: 'available' | 'booked' | 'blocked';
   createdAt?: any;
   updatedAt?: any;
+}
+
+// Table names
+const TABLES = {
+  USERS: 'users',
+  TOURS: 'tours',
+  BOOKINGS: 'bookings',
+  DESTINATIONS: 'destinations',
+  ACTIVITIES: 'recent_activities',
+  PAYMENTS: 'payments',
+  SALES: 'sales',
+  DATE_AVAILABILITY: 'date_availability',
+  RATINGS: 'ratings'
+} as const;
+
+// Generic CRUD operations
+export class FirebaseService {
+  // Create a new document
+  static async create<T>(tableName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const now = new Date().toISOString();
+      const { data: result, error } = await supabase
+        .from(tableName)
+        .insert({
+          ...data,
+          createdAt: now,
+          updatedAt: now
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      return result.id;
+    } catch (error) {
+      console.error(`Error creating document in ${tableName}:`, error);
+      throw error;
+    }
+  }
+
+  // Get a single document by ID
+  static async getById<T>(tableName: string, id: string): Promise<T | null> {
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null; // Not found
+        throw error;
+      }
+      return data as T;
+    } catch (error) {
+      console.error(`Error getting document from ${tableName}:`, error);
+      throw error;
+    }
+  }
+
+  // Get all documents from a table
+  static async getAll<T>(tableName: string): Promise<T[]> {
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*');
+
+      if (error) throw error;
+      return (data || []) as T[];
+    } catch (error) {
+      console.error(`Error getting all documents from ${tableName}:`, error);
+      throw error;
+    }
+  }
+
+  // Update a document
+  static async update<T>(tableName: string, id: string, data: Partial<T>): Promise<void> {
+    try {
+      console.log(`🔄 Updating document in ${tableName} with ID: ${id}`);
+
+      const now = new Date().toISOString();
+      const updateData = {
+        ...data,
+        updatedAt: now
+      };
+
+      const { error } = await supabase
+        .from(tableName)
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+      console.log(`✅ Successfully updated document in ${tableName}`);
+    } catch (error) {
+      console.error(`❌ Error updating document in ${tableName}:`, error);
+      throw error;
+    }
+  }
+
+  // Delete a document
+  static async delete(tableName: string, id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error(`Error deleting document from ${tableName}:`, error);
+      throw error;
+    }
+  }
+
+  // Query documents with conditions
+  static async query<T>(
+    tableName: string,
+    conditions: Array<{ field: string; operator: any; value: any }>,
+    orderByField?: string,
+    orderDirection?: 'asc' | 'desc',
+    limitCount?: number
+  ): Promise<T[]> {
+    try {
+      console.log(`Querying ${tableName} with conditions:`, conditions);
+      let queryBuilder = supabase.from(tableName).select('*');
+
+      // Apply where conditions
+      conditions.forEach(condition => {
+        const op = condition.operator;
+        if (op === '==' || op === 'eq') {
+          queryBuilder = queryBuilder.eq(condition.field, condition.value);
+        } else if (op === '!=' || op === 'neq') {
+          queryBuilder = queryBuilder.neq(condition.field, condition.value);
+        } else if (op === '>' || op === 'gt') {
+          queryBuilder = queryBuilder.gt(condition.field, condition.value);
+        } else if (op === '>=' || op === 'gte') {
+          queryBuilder = queryBuilder.gte(condition.field, condition.value);
+        } else if (op === '<' || op === 'lt') {
+          queryBuilder = queryBuilder.lt(condition.field, condition.value);
+        } else if (op === '<=' || op === 'lte') {
+          queryBuilder = queryBuilder.lte(condition.field, condition.value);
+        } else if (op === 'in') {
+          queryBuilder = queryBuilder.in(condition.field, condition.value);
+        } else {
+          // Default to eq
+          queryBuilder = queryBuilder.eq(condition.field, condition.value);
+        }
+      });
+
+      // Apply ordering if specified
+      if (orderByField) {
+        queryBuilder = queryBuilder.order(orderByField, { ascending: orderDirection === 'asc' });
+      }
+
+      // Apply limit if specified
+      if (limitCount) {
+        queryBuilder = queryBuilder.limit(limitCount);
+      }
+
+      console.log('Executing Supabase query...');
+      const { data, error } = await queryBuilder;
+
+      if (error) throw error;
+
+      const results = (data || []) as T[];
+      console.log('Query results count:', results.length);
+      return results;
+    } catch (error) {
+      console.error(`Error querying ${tableName}:`, error);
+      throw error;
+    }
+  }
+}
+
+// Specific service methods for each table
+export class UserService {
+  static async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<User>(TABLES.USERS, userData);
+  }
+
+  static async getUserById(id: string): Promise<User | null> {
+    return FirebaseService.getById<User>(TABLES.USERS, id);
+  }
+
+  static async getAllUsers(): Promise<User[]> {
+    return FirebaseService.getAll<User>(TABLES.USERS);
+  }
+
+  static async updateUser(id: string, userData: Partial<User>): Promise<void> {
+    return FirebaseService.update<User>(TABLES.USERS, id, userData);
+  }
+
+  static async deleteUser(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.USERS, id);
+  }
+
+  static async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      console.log('Searching for user with email:', email);
+
+      // Try to find user with lowercase 'email' field first
+      let { data: users, error } = await supabase
+        .from(TABLES.USERS)
+        .select('*')
+        .ilike('email', email);
+
+      if (error) throw error;
+
+      if (users && users.length > 0) {
+        console.log('Found user with email field:', users[0]);
+        return users[0] as User;
+      }
+
+      // If not found, try case-insensitive search on all users
+      console.log('Not found with email field, trying broader search...');
+      const { data: allUsers, error: allError } = await supabase
+        .from(TABLES.USERS)
+        .select('*');
+
+      if (allError) throw allError;
+
+      if (allUsers) {
+        const foundUser = allUsers.find((user: any) => {
+          const userEmail = user.Email || user.email;
+          return userEmail && userEmail.toLowerCase() === email.toLowerCase();
+        });
+
+        if (foundUser) {
+          console.log('Found user with case-insensitive match:', foundUser);
+          return foundUser as User;
+        }
+      }
+
+      console.log('No user found with email:', email);
+      return null;
+    } catch (error) {
+      console.error('Error in getUserByEmail:', error);
+      throw error;
+    }
+  }
+}
+
+export class TourService {
+  static async createTour(tourData: Omit<Tour, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<Tour>(TABLES.TOURS, tourData);
+  }
+
+  static async getTourById(id: string): Promise<Tour | null> {
+    return FirebaseService.getById<Tour>(TABLES.TOURS, id);
+  }
+
+  static async getAllTours(): Promise<Tour[]> {
+    return FirebaseService.getAll<Tour>(TABLES.TOURS);
+  }
+
+  static async getActiveTours(): Promise<Tour[]> {
+    return FirebaseService.query<Tour>(
+      TABLES.TOURS,
+      [{ field: 'isActive', operator: '==', value: true }],
+      'startDate',
+      'asc'
+    );
+  }
+
+  static async getToursByDestination(destination: string): Promise<Tour[]> {
+    return FirebaseService.query<Tour>(
+      TABLES.TOURS,
+      [
+        { field: 'destination', operator: '==', value: destination },
+        { field: 'isActive', operator: '==', value: true }
+      ],
+      'startDate',
+      'asc'
+    );
+  }
+
+  static async updateTour(id: string, tourData: Partial<Tour>): Promise<void> {
+    return FirebaseService.update<Tour>(TABLES.TOURS, id, tourData);
+  }
+
+  static async deleteTour(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.TOURS, id);
+  }
+}
+
+export class BookingService {
+  static async createBooking(bookingData: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<Booking>(TABLES.BOOKINGS, bookingData);
+  }
+
+  static async getBookingById(id: string): Promise<Booking | null> {
+    return FirebaseService.getById<Booking>(TABLES.BOOKINGS, id);
+  }
+
+  static async getAllBookings(): Promise<Booking[]> {
+    return FirebaseService.getAll<Booking>(TABLES.BOOKINGS);
+  }
+
+  static async getBookingsByUser(userId: string): Promise<Booking[]> {
+    return FirebaseService.query<Booking>(
+      TABLES.BOOKINGS,
+      [{ field: 'userId', operator: '==', value: userId }],
+      'bookingDate',
+      'desc'
+    );
+  }
+
+  static async getBookingsByTour(tourId: string): Promise<Booking[]> {
+    return FirebaseService.query<Booking>(
+      TABLES.BOOKINGS,
+      [{ field: 'tourId', operator: '==', value: tourId }],
+      'bookingDate',
+      'desc'
+    );
+  }
+
+  static async updateBooking(id: string, bookingData: Partial<Booking>): Promise<void> {
+    return FirebaseService.update<Booking>(TABLES.BOOKINGS, id, bookingData);
+  }
+
+  static async deleteBooking(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.BOOKINGS, id);
+  }
+}
+
+export class DestinationService {
+  static async createDestination(destinationData: Omit<Destination, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<Destination>(TABLES.DESTINATIONS, destinationData);
+  }
+
+  static async getDestinationById(id: string): Promise<Destination | null> {
+    return FirebaseService.getById<Destination>(TABLES.DESTINATIONS, id);
+  }
+
+  static async getAllDestinations(): Promise<Destination[]> {
+    return FirebaseService.getAll<Destination>(TABLES.DESTINATIONS);
+  }
+
+  static async getDestinationsByCountry(country: string): Promise<Destination[]> {
+    return FirebaseService.query<Destination>(
+      TABLES.DESTINATIONS,
+      [{ field: 'country', operator: '==', value: country }]
+    );
+  }
+
+  static async updateDestination(id: string, destinationData: Partial<Destination>): Promise<void> {
+    return FirebaseService.update<Destination>(TABLES.DESTINATIONS, id, destinationData);
+  }
+
+  static async deleteDestination(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.DESTINATIONS, id);
+  }
+}
+
+export class ActivityService {
+  static async createActivity(activityData: Omit<RecentActivity, 'id' | 'createdAt'>): Promise<string> {
+    return FirebaseService.create<RecentActivity>(TABLES.ACTIVITIES, activityData);
+  }
+
+  static async getRecentActivities(limitCount: number = 10): Promise<RecentActivity[]> {
+    return FirebaseService.query<RecentActivity>(
+      TABLES.ACTIVITIES,
+      [],
+      'timestamp',
+      'desc',
+      limitCount
+    );
+  }
+
+  static async getActivitiesByType(type: RecentActivity['type']): Promise<RecentActivity[]> {
+    return FirebaseService.query<RecentActivity>(
+      TABLES.ACTIVITIES,
+      [{ field: 'type', operator: '==', value: type }],
+      'timestamp',
+      'desc'
+    );
+  }
+}
+
+// Payment Service for Supabase operations
+export class PaymentService {
+  static async createPayment(paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<Payment>(TABLES.PAYMENTS, paymentData);
+  }
+
+  static async getPaymentById(id: string): Promise<Payment | null> {
+    return FirebaseService.getById<Payment>(TABLES.PAYMENTS, id);
+  }
+
+  static async getPaymentsByBooking(bookingId: string): Promise<Payment[]> {
+    return FirebaseService.query<Payment>(
+      TABLES.PAYMENTS,
+      [{ field: 'bookingId', operator: '==', value: bookingId }],
+      'createdAt',
+      'desc'
+    );
+  }
+
+  static async getPaymentsByUser(userId: string): Promise<Payment[]> {
+    return FirebaseService.query<Payment>(
+      TABLES.PAYMENTS,
+      [{ field: 'customerEmail', operator: '==', value: userId }]
+    );
+  }
+
+  static async getAllPayments(): Promise<Payment[]> {
+    return FirebaseService.getAll<Payment>(TABLES.PAYMENTS);
+  }
+
+  static async updatePayment(id: string, paymentData: Partial<Payment>): Promise<void> {
+    return FirebaseService.update<Payment>(TABLES.PAYMENTS, id, paymentData);
+  }
+
+  static async deletePayment(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.PAYMENTS, id);
+  }
+}
+
+// Sales Service for tracking sales and analytics
+export class SalesService {
+  static async createSalesRecord(salesData: Omit<SalesRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    return FirebaseService.create<SalesRecord>(TABLES.SALES, salesData);
+  }
+
+  static async getSalesRecordById(id: string): Promise<SalesRecord | null> {
+    return FirebaseService.getById<SalesRecord>(TABLES.SALES, id);
+  }
+
+  static async getAllSales(): Promise<SalesRecord[]> {
+    return FirebaseService.getAll<SalesRecord>(TABLES.SALES);
+  }
+
+  static async getSalesByDateRange(startDate: string, endDate: string): Promise<SalesRecord[]> {
+    return FirebaseService.query<SalesRecord>(
+      TABLES.SALES,
+      [
+        { field: 'paymentDate', operator: '>=', value: startDate },
+        { field: 'paymentDate', operator: '<=', value: endDate }
+      ],
+      'paymentDate',
+      'desc'
+    );
+  }
+
+  static async getSalesByTour(tourId: string): Promise<SalesRecord[]> {
+    return FirebaseService.query<SalesRecord>(
+      TABLES.SALES,
+      [{ field: 'tourId', operator: '==', value: tourId }],
+      'paymentDate',
+      'desc'
+    );
+  }
+
+  static async getTotalSales(): Promise<number> {
+    const sales = await this.getAllSales();
+    return sales
+      .filter(sale => sale.paymentStatus === 'paid')
+      .reduce((total, sale) => total + sale.amount, 0);
+  }
+
+  static async getSalesByPaymentMethod(): Promise<{ [key: string]: number }> {
+    const sales = await this.getAllSales();
+    const salesByMethod: { [key: string]: number } = {};
+
+    sales
+      .filter(sale => sale.paymentStatus === 'paid')
+      .forEach(sale => {
+        salesByMethod[sale.paymentMethod] = (salesByMethod[sale.paymentMethod] || 0) + sale.amount;
+      });
+
+    return salesByMethod;
+  }
+
+  static async getAllSalesRecords(): Promise<SalesRecord[]> {
+    return FirebaseService.getAll<SalesRecord>(TABLES.SALES);
+  }
+
+  static async updateSalesRecord(id: string, salesData: Partial<SalesRecord>): Promise<void> {
+    return FirebaseService.update<SalesRecord>(TABLES.SALES, id, salesData);
+  }
+
+  static async deleteSalesRecord(id: string): Promise<void> {
+    return FirebaseService.delete(TABLES.SALES, id);
+  }
+}
+
+export class DateAvailabilityService {
+  static async checkDateAvailability(tourId: string, date: string): Promise<boolean> {
+    try {
+      const availability = await FirebaseService.query<DateAvailability>(
+        TABLES.DATE_AVAILABILITY,
+        [
+          { field: 'tourId', operator: '==', value: tourId },
+          { field: 'date', operator: '==', value: date }
+        ]
+      );
+
+      // If no record exists, date is available
+      if (availability.length === 0) {
+        return true;
+      }
+
+      // Check if any record shows the date as available
+      return availability.some(record => record.isAvailable && record.status === 'available');
+    } catch (error) {
+      console.error('Error checking date availability:', error);
+      return false;
+    }
+  }
+
+  static async bookDate(tourId: string, date: string, bookingId: string, userId: string): Promise<string> {
+    const availabilityData: Omit<DateAvailability, 'id' | 'createdAt' | 'updatedAt'> = {
+      tourId,
+      date,
+      isAvailable: false,
+      bookingId,
+      userId,
+      status: 'booked'
+    };
+
+    return FirebaseService.create<DateAvailability>(TABLES.DATE_AVAILABILITY, availabilityData);
+  }
+
+  static async releaseDate(tourId: string, date: string): Promise<void> {
+    try {
+      const availability = await FirebaseService.query<DateAvailability>(
+        TABLES.DATE_AVAILABILITY,
+        [
+          { field: 'tourId', operator: '==', value: tourId },
+          { field: 'date', operator: '==', value: date }
+        ]
+      );
+
+      // Delete the availability record to make date available again
+      for (const record of availability) {
+        if (record.id) {
+          await FirebaseService.delete(TABLES.DATE_AVAILABILITY, record.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error releasing date:', error);
+    }
+  }
+
+  static async getBookedDatesForTour(tourId: string): Promise<DateAvailability[]> {
+    return FirebaseService.query<DateAvailability>(
+      TABLES.DATE_AVAILABILITY,
+      [
+        { field: 'tourId', operator: '==', value: tourId },
+        { field: 'status', operator: '==', value: 'booked' }
+      ]
+    );
+  }
+
+  static async getBookedDatesForUser(userId: string): Promise<DateAvailability[]> {
+    return FirebaseService.query<DateAvailability>(
+      TABLES.DATE_AVAILABILITY,
+      [
+        { field: 'userId', operator: '==', value: userId },
+        { field: 'status', operator: '==', value: 'booked' }
+      ]
+    );
+  }
 }
 
 // Helper function to initialize sample data
@@ -816,7 +822,7 @@ export async function initializeSampleData() {
         description: 'Experience the best of Bali with this comprehensive 7-day tour including cultural sites, beaches, and adventure activities.',
         destination: 'Bali',
         duration: 7,
-        price: 60000, // ₱60,000
+        price: 60000,
         startDate: '2024-03-15',
         endDate: '2024-03-22',
         availabilityUntil: '2024-12-31',
@@ -828,7 +834,7 @@ export async function initializeSampleData() {
         description: 'Discover Tokyo\'s rich culture and modern attractions in this 5-day guided tour.',
         destination: 'Tokyo',
         duration: 5,
-        price: 90000, // ₱90,000
+        price: 90000,
         startDate: '2024-04-10',
         endDate: '2024-04-15',
         availabilityUntil: '2024-12-31',
@@ -840,7 +846,7 @@ export async function initializeSampleData() {
         description: 'Relax and unwind on the pristine beaches of Boracay with this 6-day beach getaway.',
         destination: 'Boracay',
         duration: 6,
-        price: 45000, // ₱45,000
+        price: 45000,
         startDate: '2024-05-20',
         endDate: '2024-05-26',
         availabilityUntil: '2024-12-31',
@@ -852,7 +858,7 @@ export async function initializeSampleData() {
         description: 'Challenge yourself with a guided climb to the summit of Mount Fuji, Japan\'s most iconic mountain.',
         destination: 'Mount Fuji',
         duration: 3,
-        price: 35000, // ₱35,000
+        price: 35000,
         startDate: '2024-07-15',
         endDate: '2024-07-18',
         availabilityUntil: '2024-12-31',
@@ -864,7 +870,7 @@ export async function initializeSampleData() {
         description: 'Explore the Big Apple with this 4-day tour covering all major attractions and hidden gems.',
         destination: 'New York',
         duration: 4,
-        price: 75000, // ₱75,000
+        price: 75000,
         startDate: '2024-06-01',
         endDate: '2024-06-05',
         availabilityUntil: '2024-12-31',
@@ -873,13 +879,13 @@ export async function initializeSampleData() {
       }
     ];
 
-    // Add destinations to Firestore
+    // Add destinations to Supabase
     console.log('Creating sample destinations...');
     for (const destination of destinations) {
       await DestinationService.createDestination(destination);
     }
 
-    // Add tours to Firestore
+    // Add tours to Supabase
     console.log('Creating sample tours...');
     for (const tour of tours) {
       await TourService.createTour(tour);
@@ -893,7 +899,7 @@ export async function initializeSampleData() {
 }
 
 export class RatingService {
-  private static collectionName = COLLECTIONS.RATINGS;
+  private static tableName = TABLES.RATINGS;
 
   /**
    * Create a new rating
@@ -901,15 +907,20 @@ export class RatingService {
   static async createRating(ratingData: Omit<Rating, 'id' | 'createdAt'>): Promise<string> {
     try {
       console.log('Creating rating:', ratingData);
-      
-      const ratingWithTimestamp = {
-        ...ratingData,
-        createdAt: serverTimestamp()
-      };
 
-      const docRef = await addDoc(collection(db, this.collectionName), ratingWithTimestamp);
-      console.log('Rating created with ID:', docRef.id);
-      return docRef.id;
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .insert({
+          ...ratingData,
+          createdAt: now
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      console.log('Rating created with ID:', data.id);
+      return data.id;
     } catch (error) {
       console.error('Error creating rating:', error);
       throw error;
@@ -921,11 +932,12 @@ export class RatingService {
    */
   static async getAllRatings(): Promise<Rating[]> {
     try {
-      const querySnapshot = await getDocs(collection(db, this.collectionName));
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Rating));
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*');
+
+      if (error) throw error;
+      return (data || []) as Rating[];
     } catch (error) {
       console.error('Error getting ratings:', error);
       throw error;
@@ -937,16 +949,14 @@ export class RatingService {
    */
   static async getRatingsByTour(tourId: string): Promise<Rating[]> {
     try {
-      const q = query(
-        collection(db, this.collectionName),
-        where('tourId', '==', tourId),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Rating));
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('tourId', tourId)
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as Rating[];
     } catch (error) {
       console.error('Error getting ratings by tour:', error);
       throw error;
@@ -958,16 +968,14 @@ export class RatingService {
    */
   static async getRatingsByUser(userId: string): Promise<Rating[]> {
     try {
-      const q = query(
-        collection(db, this.collectionName),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Rating));
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('userId', userId)
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as Rating[];
     } catch (error) {
       console.error('Error getting ratings by user:', error);
       throw error;
@@ -979,21 +987,14 @@ export class RatingService {
    */
   static async getRatingByBooking(bookingId: string): Promise<Rating | null> {
     try {
-      const q = query(
-        collection(db, this.collectionName),
-        where('bookingId', '==', bookingId)
-      );
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        return null;
-      }
-      
-      const doc = querySnapshot.docs[0];
-      return {
-        id: doc.id,
-        ...doc.data()
-      } as Rating;
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('bookingId', bookingId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Rating | null;
     } catch (error) {
       console.error('Error getting rating by booking:', error);
       throw error;
@@ -1005,11 +1006,15 @@ export class RatingService {
    */
   static async updateRating(ratingId: string, updates: Partial<Rating>): Promise<void> {
     try {
-      const ratingRef = doc(db, this.collectionName, ratingId);
-      await updateDoc(ratingRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      });
+      const { error } = await supabase
+        .from(this.tableName)
+        .update({
+          ...updates,
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', ratingId);
+
+      if (error) throw error;
       console.log('Rating updated successfully');
     } catch (error) {
       console.error('Error updating rating:', error);
@@ -1022,8 +1027,12 @@ export class RatingService {
    */
   static async deleteRating(ratingId: string): Promise<void> {
     try {
-      const ratingRef = doc(db, this.collectionName, ratingId);
-      await deleteDoc(ratingRef);
+      const { error } = await supabase
+        .from(this.tableName)
+        .delete()
+        .eq('id', ratingId);
+
+      if (error) throw error;
       console.log('Rating deleted successfully');
     } catch (error) {
       console.error('Error deleting rating:', error);
@@ -1037,14 +1046,14 @@ export class RatingService {
   static async getAverageRating(tourId: string): Promise<{ average: number; count: number }> {
     try {
       const ratings = await this.getRatingsByTour(tourId);
-      
+
       if (ratings.length === 0) {
         return { average: 0, count: 0 };
       }
-      
+
       const total = ratings.reduce((sum, rating) => sum + rating.rating, 0);
       const average = total / ratings.length;
-      
+
       return { average: Math.round(average * 10) / 10, count: ratings.length };
     } catch (error) {
       console.error('Error getting average rating:', error);
@@ -1053,4 +1062,4 @@ export class RatingService {
   }
 }
 
-export { COLLECTIONS };
+export { TABLES as COLLECTIONS };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BookingService, ActivityService, PaymentService as FirebasePaymentService, SalesService, DateAvailabilityService } from '../utils/firebaseService';
+import { BookingService, ActivityService, PaymentService as FirebasePaymentService, SalesService, DateAvailabilityService } from '../utils/supabaseService';
 import './PaymentSuccess.css';
 
 const PaymentSuccess: React.FC = () => {
