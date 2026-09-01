@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { PaymentService } from '../utils/paymentService';
-import { BookingService, PaymentService as FirebasePaymentService, SalesService } from '../utils/supabaseService';
+import { BookingService, PaymentService as SupabasePaymentService, SalesService } from '../utils/supabaseService';
 import './RemainingPaymentModal.css';
 
 interface RemainingPaymentModalProps {

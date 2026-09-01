@@ -208,7 +208,7 @@ const TABLES = {
 } as const;
 
 // Generic CRUD operations
-export class FirebaseService {
+export class SupabaseDataService {
   // Create a new document
   static async create<T>(tableName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
@@ -368,23 +368,23 @@ export class FirebaseService {
 // Specific service methods for each table
 export class UserService {
   static async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<User>(TABLES.USERS, userData);
+    return SupabaseDataService.create<User>(TABLES.USERS, userData);
   }
 
   static async getUserById(id: string): Promise<User | null> {
-    return FirebaseService.getById<User>(TABLES.USERS, id);
+    return SupabaseDataService.getById<User>(TABLES.USERS, id);
   }
 
   static async getAllUsers(): Promise<User[]> {
-    return FirebaseService.getAll<User>(TABLES.USERS);
+    return SupabaseDataService.getAll<User>(TABLES.USERS);
   }
 
   static async updateUser(id: string, userData: Partial<User>): Promise<void> {
-    return FirebaseService.update<User>(TABLES.USERS, id, userData);
+    return SupabaseDataService.update<User>(TABLES.USERS, id, userData);
   }
 
   static async deleteUser(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.USERS, id);
+    return SupabaseDataService.delete(TABLES.USERS, id);
   }
 
   static async getUserByEmail(email: string): Promise<User | null> {
@@ -435,19 +435,19 @@ export class UserService {
 
 export class TourService {
   static async createTour(tourData: Omit<Tour, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Tour>(TABLES.TOURS, tourData);
+    return SupabaseDataService.create<Tour>(TABLES.TOURS, tourData);
   }
 
   static async getTourById(id: string): Promise<Tour | null> {
-    return FirebaseService.getById<Tour>(TABLES.TOURS, id);
+    return SupabaseDataService.getById<Tour>(TABLES.TOURS, id);
   }
 
   static async getAllTours(): Promise<Tour[]> {
-    return FirebaseService.getAll<Tour>(TABLES.TOURS);
+    return SupabaseDataService.getAll<Tour>(TABLES.TOURS);
   }
 
   static async getActiveTours(): Promise<Tour[]> {
-    return FirebaseService.query<Tour>(
+    return SupabaseDataService.query<Tour>(
       TABLES.TOURS,
       [{ field: 'isActive', operator: '==', value: true }],
       'startDate',
@@ -456,7 +456,7 @@ export class TourService {
   }
 
   static async getToursByDestination(destination: string): Promise<Tour[]> {
-    return FirebaseService.query<Tour>(
+    return SupabaseDataService.query<Tour>(
       TABLES.TOURS,
       [
         { field: 'destination', operator: '==', value: destination },
@@ -468,29 +468,29 @@ export class TourService {
   }
 
   static async updateTour(id: string, tourData: Partial<Tour>): Promise<void> {
-    return FirebaseService.update<Tour>(TABLES.TOURS, id, tourData);
+    return SupabaseDataService.update<Tour>(TABLES.TOURS, id, tourData);
   }
 
   static async deleteTour(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.TOURS, id);
+    return SupabaseDataService.delete(TABLES.TOURS, id);
   }
 }
 
 export class BookingService {
   static async createBooking(bookingData: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Booking>(TABLES.BOOKINGS, bookingData);
+    return SupabaseDataService.create<Booking>(TABLES.BOOKINGS, bookingData);
   }
 
   static async getBookingById(id: string): Promise<Booking | null> {
-    return FirebaseService.getById<Booking>(TABLES.BOOKINGS, id);
+    return SupabaseDataService.getById<Booking>(TABLES.BOOKINGS, id);
   }
 
   static async getAllBookings(): Promise<Booking[]> {
-    return FirebaseService.getAll<Booking>(TABLES.BOOKINGS);
+    return SupabaseDataService.getAll<Booking>(TABLES.BOOKINGS);
   }
 
   static async getBookingsByUser(userId: string): Promise<Booking[]> {
-    return FirebaseService.query<Booking>(
+    return SupabaseDataService.query<Booking>(
       TABLES.BOOKINGS,
       [{ field: 'userId', operator: '==', value: userId }],
       'bookingDate',
@@ -499,7 +499,7 @@ export class BookingService {
   }
 
   static async getBookingsByTour(tourId: string): Promise<Booking[]> {
-    return FirebaseService.query<Booking>(
+    return SupabaseDataService.query<Booking>(
       TABLES.BOOKINGS,
       [{ field: 'tourId', operator: '==', value: tourId }],
       'bookingDate',
@@ -508,50 +508,50 @@ export class BookingService {
   }
 
   static async updateBooking(id: string, bookingData: Partial<Booking>): Promise<void> {
-    return FirebaseService.update<Booking>(TABLES.BOOKINGS, id, bookingData);
+    return SupabaseDataService.update<Booking>(TABLES.BOOKINGS, id, bookingData);
   }
 
   static async deleteBooking(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.BOOKINGS, id);
+    return SupabaseDataService.delete(TABLES.BOOKINGS, id);
   }
 }
 
 export class DestinationService {
   static async createDestination(destinationData: Omit<Destination, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Destination>(TABLES.DESTINATIONS, destinationData);
+    return SupabaseDataService.create<Destination>(TABLES.DESTINATIONS, destinationData);
   }
 
   static async getDestinationById(id: string): Promise<Destination | null> {
-    return FirebaseService.getById<Destination>(TABLES.DESTINATIONS, id);
+    return SupabaseDataService.getById<Destination>(TABLES.DESTINATIONS, id);
   }
 
   static async getAllDestinations(): Promise<Destination[]> {
-    return FirebaseService.getAll<Destination>(TABLES.DESTINATIONS);
+    return SupabaseDataService.getAll<Destination>(TABLES.DESTINATIONS);
   }
 
   static async getDestinationsByCountry(country: string): Promise<Destination[]> {
-    return FirebaseService.query<Destination>(
+    return SupabaseDataService.query<Destination>(
       TABLES.DESTINATIONS,
       [{ field: 'country', operator: '==', value: country }]
     );
   }
 
   static async updateDestination(id: string, destinationData: Partial<Destination>): Promise<void> {
-    return FirebaseService.update<Destination>(TABLES.DESTINATIONS, id, destinationData);
+    return SupabaseDataService.update<Destination>(TABLES.DESTINATIONS, id, destinationData);
   }
 
   static async deleteDestination(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.DESTINATIONS, id);
+    return SupabaseDataService.delete(TABLES.DESTINATIONS, id);
   }
 }
 
 export class ActivityService {
   static async createActivity(activityData: Omit<RecentActivity, 'id' | 'createdAt'>): Promise<string> {
-    return FirebaseService.create<RecentActivity>(TABLES.ACTIVITIES, activityData);
+    return SupabaseDataService.create<RecentActivity>(TABLES.ACTIVITIES, activityData);
   }
 
   static async getRecentActivities(limitCount: number = 10): Promise<RecentActivity[]> {
-    return FirebaseService.query<RecentActivity>(
+    return SupabaseDataService.query<RecentActivity>(
       TABLES.ACTIVITIES,
       [],
       'timestamp',
@@ -561,7 +561,7 @@ export class ActivityService {
   }
 
   static async getActivitiesByType(type: RecentActivity['type']): Promise<RecentActivity[]> {
-    return FirebaseService.query<RecentActivity>(
+    return SupabaseDataService.query<RecentActivity>(
       TABLES.ACTIVITIES,
       [{ field: 'type', operator: '==', value: type }],
       'timestamp',
@@ -573,15 +573,15 @@ export class ActivityService {
 // Payment Service for Supabase operations
 export class PaymentService {
   static async createPayment(paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<Payment>(TABLES.PAYMENTS, paymentData);
+    return SupabaseDataService.create<Payment>(TABLES.PAYMENTS, paymentData);
   }
 
   static async getPaymentById(id: string): Promise<Payment | null> {
-    return FirebaseService.getById<Payment>(TABLES.PAYMENTS, id);
+    return SupabaseDataService.getById<Payment>(TABLES.PAYMENTS, id);
   }
 
   static async getPaymentsByBooking(bookingId: string): Promise<Payment[]> {
-    return FirebaseService.query<Payment>(
+    return SupabaseDataService.query<Payment>(
       TABLES.PAYMENTS,
       [{ field: 'bookingId', operator: '==', value: bookingId }],
       'createdAt',
@@ -590,41 +590,41 @@ export class PaymentService {
   }
 
   static async getPaymentsByUser(userId: string): Promise<Payment[]> {
-    return FirebaseService.query<Payment>(
+    return SupabaseDataService.query<Payment>(
       TABLES.PAYMENTS,
       [{ field: 'customerEmail', operator: '==', value: userId }]
     );
   }
 
   static async getAllPayments(): Promise<Payment[]> {
-    return FirebaseService.getAll<Payment>(TABLES.PAYMENTS);
+    return SupabaseDataService.getAll<Payment>(TABLES.PAYMENTS);
   }
 
   static async updatePayment(id: string, paymentData: Partial<Payment>): Promise<void> {
-    return FirebaseService.update<Payment>(TABLES.PAYMENTS, id, paymentData);
+    return SupabaseDataService.update<Payment>(TABLES.PAYMENTS, id, paymentData);
   }
 
   static async deletePayment(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.PAYMENTS, id);
+    return SupabaseDataService.delete(TABLES.PAYMENTS, id);
   }
 }
 
 // Sales Service for tracking sales and analytics
 export class SalesService {
   static async createSalesRecord(salesData: Omit<SalesRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return FirebaseService.create<SalesRecord>(TABLES.SALES, salesData);
+    return SupabaseDataService.create<SalesRecord>(TABLES.SALES, salesData);
   }
 
   static async getSalesRecordById(id: string): Promise<SalesRecord | null> {
-    return FirebaseService.getById<SalesRecord>(TABLES.SALES, id);
+    return SupabaseDataService.getById<SalesRecord>(TABLES.SALES, id);
   }
 
   static async getAllSales(): Promise<SalesRecord[]> {
-    return FirebaseService.getAll<SalesRecord>(TABLES.SALES);
+    return SupabaseDataService.getAll<SalesRecord>(TABLES.SALES);
   }
 
   static async getSalesByDateRange(startDate: string, endDate: string): Promise<SalesRecord[]> {
-    return FirebaseService.query<SalesRecord>(
+    return SupabaseDataService.query<SalesRecord>(
       TABLES.SALES,
       [
         { field: 'paymentDate', operator: '>=', value: startDate },
@@ -636,7 +636,7 @@ export class SalesService {
   }
 
   static async getSalesByTour(tourId: string): Promise<SalesRecord[]> {
-    return FirebaseService.query<SalesRecord>(
+    return SupabaseDataService.query<SalesRecord>(
       TABLES.SALES,
       [{ field: 'tourId', operator: '==', value: tourId }],
       'paymentDate',
@@ -665,22 +665,22 @@ export class SalesService {
   }
 
   static async getAllSalesRecords(): Promise<SalesRecord[]> {
-    return FirebaseService.getAll<SalesRecord>(TABLES.SALES);
+    return SupabaseDataService.getAll<SalesRecord>(TABLES.SALES);
   }
 
   static async updateSalesRecord(id: string, salesData: Partial<SalesRecord>): Promise<void> {
-    return FirebaseService.update<SalesRecord>(TABLES.SALES, id, salesData);
+    return SupabaseDataService.update<SalesRecord>(TABLES.SALES, id, salesData);
   }
 
   static async deleteSalesRecord(id: string): Promise<void> {
-    return FirebaseService.delete(TABLES.SALES, id);
+    return SupabaseDataService.delete(TABLES.SALES, id);
   }
 }
 
 export class DateAvailabilityService {
   static async checkDateAvailability(tourId: string, date: string): Promise<boolean> {
     try {
-      const availability = await FirebaseService.query<DateAvailability>(
+      const availability = await SupabaseDataService.query<DateAvailability>(
         TABLES.DATE_AVAILABILITY,
         [
           { field: 'tourId', operator: '==', value: tourId },
@@ -711,12 +711,12 @@ export class DateAvailabilityService {
       status: 'booked'
     };
 
-    return FirebaseService.create<DateAvailability>(TABLES.DATE_AVAILABILITY, availabilityData);
+    return SupabaseDataService.create<DateAvailability>(TABLES.DATE_AVAILABILITY, availabilityData);
   }
 
   static async releaseDate(tourId: string, date: string): Promise<void> {
     try {
-      const availability = await FirebaseService.query<DateAvailability>(
+      const availability = await SupabaseDataService.query<DateAvailability>(
         TABLES.DATE_AVAILABILITY,
         [
           { field: 'tourId', operator: '==', value: tourId },
@@ -727,7 +727,7 @@ export class DateAvailabilityService {
       // Delete the availability record to make date available again
       for (const record of availability) {
         if (record.id) {
-          await FirebaseService.delete(TABLES.DATE_AVAILABILITY, record.id);
+          await SupabaseDataService.delete(TABLES.DATE_AVAILABILITY, record.id);
         }
       }
     } catch (error) {
@@ -736,7 +736,7 @@ export class DateAvailabilityService {
   }
 
   static async getBookedDatesForTour(tourId: string): Promise<DateAvailability[]> {
-    return FirebaseService.query<DateAvailability>(
+    return SupabaseDataService.query<DateAvailability>(
       TABLES.DATE_AVAILABILITY,
       [
         { field: 'tourId', operator: '==', value: tourId },
@@ -746,7 +746,7 @@ export class DateAvailabilityService {
   }
 
   static async getBookedDatesForUser(userId: string): Promise<DateAvailability[]> {
-    return FirebaseService.query<DateAvailability>(
+    return SupabaseDataService.query<DateAvailability>(
       TABLES.DATE_AVAILABILITY,
       [
         { field: 'userId', operator: '==', value: userId },
@@ -1062,4 +1062,4 @@ export class RatingService {
   }
 }
 
-export { TABLES as COLLECTIONS };
+export { TABLES as COLLECTIONS, SupabaseDataService as FirebaseService };

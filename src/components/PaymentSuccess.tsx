@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BookingService, ActivityService, PaymentService as FirebasePaymentService, SalesService, DateAvailabilityService } from '../utils/supabaseService';
+import { BookingService, ActivityService, PaymentService as SupabasePaymentService, SalesService, DateAvailabilityService } from '../utils/supabaseService';
 import './PaymentSuccess.css';
 
 const PaymentSuccess: React.FC = () => {
@@ -12,7 +12,7 @@ const PaymentSuccess: React.FC = () => {
       console.log('🔄 Processing remaining payment for booking:', remainingPaymentData.bookingId);
 
       // Create payment record for remaining amount
-      const paymentId = await FirebasePaymentService.createPayment({
+      const paymentId = await SupabasePaymentService.createPayment({
         paymentIntentId: sessionId,
         bookingId: remainingPaymentData.bookingId,
         amount: remainingPaymentData.amount,
@@ -204,7 +204,7 @@ const PaymentSuccess: React.FC = () => {
 
         // Create payment record with all required fields
         console.log('🔄 Creating payment record...');
-        const paymentId = await FirebasePaymentService.createPayment({
+        const paymentId = await SupabasePaymentService.createPayment({
           paymentIntentId: sessionId,
           bookingId: newBookingId,
           amount: bookingData.totalAmount,

@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      // Use custom authentication (Firestore users table)
+      // Use custom authentication (Supabase users table)
       const result = await CustomAuthService.login(email, password);
       
       if (result.success && result.user) {

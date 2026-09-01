@@ -161,10 +161,10 @@ const AdminDashboardPage: React.FC = () => {
             </button>
             <button className="control-btn" onClick={() => {
               // Trigger a custom event to change page
-              window.dispatchEvent(new CustomEvent('adminPageChange', { detail: 'firebase' }));
+              window.dispatchEvent(new CustomEvent('adminPageChange', { detail: 'users' }));
             }}>
-              <span className="btn-icon">🔥</span>
-              <span className="btn-text">Firebase Admin</span>
+              <span className="btn-icon">👥</span>
+              <span className="btn-text">Manage Users</span>
             </button>
           </div>
         </div>
