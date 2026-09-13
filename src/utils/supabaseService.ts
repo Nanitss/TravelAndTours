@@ -209,17 +209,26 @@ const TABLES = {
 
 // Generic CRUD operations
 export class SupabaseDataService {
+  // Tables that do NOT have an updatedAt column
+  static readonly TABLES_WITHOUT_UPDATED_AT: readonly string[] = [TABLES.ACTIVITIES, TABLES.RATINGS];
+
   // Create a new document
   static async create<T>(tableName: string, data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const now = new Date().toISOString();
+      const insertData: any = {
+        ...data,
+        createdAt: now,
+      };
+
+      // Only add updatedAt for tables that have the column
+      if (!this.TABLES_WITHOUT_UPDATED_AT.includes(tableName)) {
+        insertData.updatedAt = now;
+      }
+
       const { data: result, error } = await supabase
         .from(tableName)
-        .insert({
-          ...data,
-          createdAt: now,
-          updatedAt: now
-        })
+        .insert(insertData)
         .select('id')
         .single();
 
@@ -272,10 +281,14 @@ export class SupabaseDataService {
       console.log(`🔄 Updating document in ${tableName} with ID: ${id}`);
 
       const now = new Date().toISOString();
-      const updateData = {
+      const updateData: any = {
         ...data,
-        updatedAt: now
       };
+
+      // Only add updatedAt for tables that have the column
+      if (!this.TABLES_WITHOUT_UPDATED_AT.includes(tableName)) {
+        updateData.updatedAt = now;
+      }
 
       const { error } = await supabase
         .from(tableName)
