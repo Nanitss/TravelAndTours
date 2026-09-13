@@ -68,7 +68,7 @@ const RemainingPaymentModal: React.FC<RemainingPaymentModalProps> = ({
         paymentMethod: selectedPaymentMethod
       });
 
-      // Create PayMongo checkout session for remaining amount
+      // Create checkout session for remaining amount
       const paymentResult = await PaymentService.processPayment(
         booking.amountRemaining,
         selectedPaymentMethod,
@@ -92,7 +92,7 @@ const RemainingPaymentModal: React.FC<RemainingPaymentModalProps> = ({
       }
 
       console.log('✅ Checkout session created for remaining payment');
-      console.log('🔗 Redirecting to PayMongo checkout...');
+      console.log('🔗 Processing payment checkout...');
 
       // Store remaining payment data in localStorage
       const remainingPaymentData = {
@@ -109,7 +109,7 @@ const RemainingPaymentModal: React.FC<RemainingPaymentModalProps> = ({
 
       localStorage.setItem('remainingPayment', JSON.stringify(remainingPaymentData));
 
-      // Redirect to PayMongo checkout
+      // Redirect to payment success page
       window.location.href = paymentResult.checkoutUrl;
 
     } catch (error) {
@@ -258,7 +258,7 @@ const RemainingPaymentModal: React.FC<RemainingPaymentModalProps> = ({
 
           <div className="security-notice">
             <span className="security-icon">🔒</span>
-            <span>Your payment is secured by PayMongo. We never store your payment details.</span>
+            <span>Your payment is secure. We never store your payment details.</span>
           </div>
 
           <div className="policy-warning">

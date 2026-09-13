@@ -1,11 +1,9 @@
-import { Booking } from './supabaseService';
+// Mock Payment Service - replaces PayMongo API calls
 
-// PayMongo API Configuration
-const PAYMONGO_CONFIG = {
-  baseUrl: 'https://api.paymongo.com/v1',
-  publicKey: process.env.REACT_APP_PAYMONGO_PUBLIC_KEY || '',
-  secretKey: process.env.REACT_APP_PAYMONGO_SECRET_KEY || '',
-  testMode: false // Disable test mode for redirection flow
+// Mock Payment Configuration
+const MOCK_PAYMENT_CONFIG = {
+  simulatedDelayMs: 2000, // 2 second delay to simulate processing
+  successRate: 1.0, // 100% success rate for mock payments
 };
 
 // Payment Method Types
@@ -46,144 +44,109 @@ export interface Payment {
   currency: string;
   paymentMethod: PaymentMethod;
   status: PaymentStatus;
-  paymongoPaymentId?: string;
+  mockPaymentId?: string;
   customerEmail: string;
   customerName: string;
   createdAt?: any;
   updatedAt?: any;
 }
 
-// Payment Service Class
+// Helper to generate mock IDs
+const generateMockId = (prefix: string): string => {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Helper to simulate network delay
+const simulateDelay = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+// Payment Service Class (Mock Implementation)
 export class PaymentService {
-  // Create Payment Intent
+  // Create Payment Intent (Mock)
   static async createPaymentIntent(
     amount: number,
     currency: string = 'PHP',
     paymentMethod: PaymentMethod
   ): Promise<PaymentIntent> {
     try {
-      const response = await fetch(`${PAYMONGO_CONFIG.baseUrl}/payment_intents`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(PAYMONGO_CONFIG.secretKey + ':')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: {
-            attributes: {
-              amount: amount * 100, // Convert to centavos
-              currency: currency,
-              payment_method_allowed: [paymentMethod],
-              description: `Travel booking payment - ${currency} ${amount}`,
-              // Add return URL for GCash and bank transfer payments
-              ...((paymentMethod === 'gcash' || paymentMethod === 'bank_transfer') && {
-                return_url: `${window.location.origin}/payment/success`,
-                cancel_url: `${window.location.origin}/payment/cancel`
-              })
-            }
-          }
-        })
-      });
+      console.log('🔄 [Mock] Creating payment intent...');
+      await simulateDelay(500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Payment intent creation failed: ${errorData.errors?.[0]?.detail || 'Unknown error'}`);
-      }
+      const mockIntent: PaymentIntent = {
+        id: generateMockId('pi'),
+        amount: amount * 100,
+        currency: currency,
+        payment_method_allowed: [paymentMethod],
+        status: 'pending',
+        client_key: generateMockId('ck'),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-      const data = await response.json();
-      return data.data;
+      console.log('✅ [Mock] Payment intent created:', mockIntent.id);
+      return mockIntent;
     } catch (error) {
-      console.error('Error creating payment intent:', error);
+      console.error('Error creating mock payment intent:', error);
       throw error;
     }
   }
 
-  // Attach Payment Method to Intent
+  // Attach Payment Method to Intent (Mock)
   static async attachPaymentMethod(
     paymentIntentId: string,
     paymentMethodId: string,
     paymentMethod: PaymentMethod
   ): Promise<Payment> {
     try {
-      const requestBody: any = {
-        data: {
-          attributes: {
-            payment_method: paymentMethodId
-          }
+      console.log('🔄 [Mock] Attaching payment method...');
+      await simulateDelay(500);
+
+      const mockPayment = {
+        id: generateMockId('pay'),
+        type: 'payment',
+        attributes: {
+          status: 'succeeded',
+          amount: 0,
+          currency: 'PHP',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
-      };
+      } as any;
 
-      // Add return URL for GCash and bank transfer payments
-      if (paymentMethod === 'gcash' || paymentMethod === 'bank_transfer') {
-        requestBody.data.attributes.return_url = `${window.location.origin}/payment/success`;
-        requestBody.data.attributes.cancel_url = `${window.location.origin}/payment/cancel`;
-      }
-
-      const response = await fetch(`${PAYMONGO_CONFIG.baseUrl}/payment_intents/${paymentIntentId}/attach`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(PAYMONGO_CONFIG.secretKey + ':')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('PayMongo API Error:', errorData);
-        
-        // In test mode, simulate successful payment for development
-        if (PAYMONGO_CONFIG.testMode) {
-          console.log('🧪 Test mode: Simulating successful payment attachment');
-          return {
-            id: `test_payment_${Date.now()}`,
-            type: 'payment',
-            attributes: {
-              status: 'succeeded',
-              amount: 0,
-              currency: 'PHP',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          } as any;
-        }
-        
-        throw new Error(`Payment method attachment failed: ${errorData.errors?.[0]?.detail || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
-      return data.data;
+      console.log('✅ [Mock] Payment method attached successfully');
+      return mockPayment;
     } catch (error) {
-      console.error('Error attaching payment method:', error);
+      console.error('Error attaching mock payment method:', error);
       throw error;
     }
   }
 
-  // Get Payment Intent Status
+  // Get Payment Intent Status (Mock)
   static async getPaymentIntentStatus(paymentIntentId: string): Promise<PaymentIntent> {
     try {
-      const response = await fetch(`${PAYMONGO_CONFIG.baseUrl}/payment_intents/${paymentIntentId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${btoa(PAYMONGO_CONFIG.secretKey + ':')}`,
-          'Content-Type': 'application/json',
-        }
-      });
+      console.log('🔄 [Mock] Getting payment intent status...');
+      await simulateDelay(300);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to get payment status: ${errorData.errors?.[0]?.detail || 'Unknown error'}`);
-      }
+      const mockIntent: PaymentIntent = {
+        id: paymentIntentId,
+        amount: 0,
+        currency: 'PHP',
+        payment_method_allowed: ['gcash'],
+        status: 'succeeded',
+        client_key: generateMockId('ck'),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-      const data = await response.json();
-      return data.data;
+      return mockIntent;
     } catch (error) {
-      console.error('Error getting payment status:', error);
+      console.error('Error getting mock payment status:', error);
       throw error;
     }
   }
 
-  // Create Payment Method
+  // Create Payment Method (Mock)
   static async createPaymentMethod(
     type: PaymentMethod,
     billing: {
@@ -193,36 +156,26 @@ export class PaymentService {
     }
   ): Promise<PaymentMethodData> {
     try {
-      const response = await fetch(`${PAYMONGO_CONFIG.baseUrl}/payment_methods`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(PAYMONGO_CONFIG.secretKey + ':')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: {
-            attributes: {
-              type: type,
-              billing: billing
-            }
-          }
-        })
-      });
+      console.log('🔄 [Mock] Creating payment method...');
+      await simulateDelay(300);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Payment method creation failed: ${errorData.errors?.[0]?.detail || 'Unknown error'}`);
-      }
+      const mockMethod: PaymentMethodData = {
+        id: generateMockId('pm'),
+        type: type,
+        billing: billing,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
-      const data = await response.json();
-      return data.data;
+      console.log('✅ [Mock] Payment method created:', mockMethod.id);
+      return mockMethod;
     } catch (error) {
-      console.error('Error creating payment method:', error);
+      console.error('Error creating mock payment method:', error);
       throw error;
     }
   }
 
-  // Create Checkout Session (PayMongo Redirection Flow)
+  // Create Checkout Session (Mock - no external redirect needed)
   static async createCheckoutSession(
     amount: number,
     paymentMethod: PaymentMethod,
@@ -246,7 +199,7 @@ export class PaymentService {
     message: string;
   }> {
     try {
-      console.log('🔄 Creating PayMongo checkout session...');
+      console.log('🔄 [Mock] Creating checkout session...');
       
       // Validate inputs
       if (amount <= 0) {
@@ -257,68 +210,39 @@ export class PaymentService {
         throw new Error('Customer information is required');
       }
 
-      // Create checkout session
-      const response = await fetch(`${PAYMONGO_CONFIG.baseUrl}/checkout_sessions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(PAYMONGO_CONFIG.secretKey + ':')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: {
-            attributes: {
-              line_items: [
-                {
-                  name: `${bookingData.packageName} - ${bookingData.passengers} ${bookingData.passengers === 1 ? 'Person' : 'People'}`,
-                  description: `Travel booking for ${bookingData.packageName} from ${bookingData.arrivalDate} to ${bookingData.departureDate}`,
-                  amount: amount * 100, // Convert to centavos
-                  currency: 'PHP',
-                  quantity: 1
-                }
-              ],
-              payment_method_types: [paymentMethod],
-              success_url: `${window.location.origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-              cancel_url: `${window.location.origin}/payment/cancel`,
-              billing: {
-                name: customerInfo.name,
-                email: customerInfo.email,
-                phone: customerInfo.phone
-              }
-            }
-          }
-        })
-      });
+      // Simulate payment processing delay
+      await simulateDelay(MOCK_PAYMENT_CONFIG.simulatedDelayMs);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Checkout session creation failed: ${errorData.errors?.[0]?.detail || 'Unknown error'}`);
+      // Determine if payment succeeds based on success rate
+      const isSuccess = Math.random() < MOCK_PAYMENT_CONFIG.successRate;
+
+      if (!isSuccess) {
+        throw new Error('Payment was declined. Please try again.');
       }
 
-      const data = await response.json();
-      const checkoutUrl = data.data.attributes.checkout_url;
-      const sessionId = data.data.id;
+      const sessionId = generateMockId('cs');
 
-      console.log('✅ Checkout session created:', sessionId);
-      console.log('🔗 Checkout URL:', checkoutUrl);
+      console.log('✅ [Mock] Checkout session created:', sessionId);
+
+      // Return a URL pointing to our own payment success page (simulating the redirect flow)
+      const successUrl = `${window.location.origin}/payment/success?session_id=${sessionId}`;
 
       return {
-        checkoutUrl,
+        checkoutUrl: successUrl,
         sessionId,
         success: true,
-        message: 'Checkout session created successfully'
+        message: 'Payment processed successfully'
       };
     } catch (error) {
-      console.error('❌ Checkout session creation failed:', error);
+      console.error('❌ [Mock] Checkout session creation failed:', error);
       
-      let errorMessage = 'Unable to create checkout session';
+      let errorMessage = 'Unable to process payment';
       
       if (error instanceof Error) {
         if (error.message.includes('Invalid payment amount')) {
           errorMessage = 'Please enter a valid payment amount';
         } else if (error.message.includes('Customer information is required')) {
           errorMessage = 'Please provide complete customer information';
-        } else if (error.message.includes('Checkout session creation failed')) {
-          errorMessage = 'Unable to create payment session. Please try again.';
         } else {
           errorMessage = error.message;
         }
@@ -333,7 +257,7 @@ export class PaymentService {
     }
   }
 
-  // Process Payment (Redirection Flow)
+  // Process Payment (Mock - Redirection Flow)
   static async processPayment(
     amount: number,
     paymentMethod: PaymentMethod,
@@ -359,7 +283,7 @@ export class PaymentService {
     return this.createCheckoutSession(amount, paymentMethod, customerInfo, bookingData);
   }
 
-  // Verify Payment Status
+  // Verify Payment Status (Mock)
   static async verifyPayment(paymentIntentId: string): Promise<{
     status: PaymentStatus;
     success: boolean;
@@ -370,66 +294,20 @@ export class PaymentService {
         throw new Error('Payment intent ID is required');
       }
 
-      // In test mode, simulate successful payment
-      if (PAYMONGO_CONFIG.testMode) {
-        console.log('🧪 Test mode: Simulating successful payment verification');
-        return {
-          status: 'succeeded',
-          success: true,
-          message: 'Payment verified successfully (test mode)'
-        };
-      }
+      console.log('🔄 [Mock] Verifying payment...');
+      await simulateDelay(500);
 
-      const paymentIntent = await this.getPaymentIntentStatus(paymentIntentId);
-      
-      let message = '';
-      switch (paymentIntent.status) {
-        case 'succeeded':
-          message = 'Payment verified successfully';
-          break;
-        case 'processing':
-          message = 'Payment is being processed. Please wait...';
-          break;
-        case 'pending':
-          message = 'Payment is pending. Please complete the payment.';
-          break;
-        case 'failed':
-          message = 'Payment failed. Please try again.';
-          break;
-        case 'cancelled':
-          message = 'Payment was cancelled.';
-          break;
-        default:
-          message = `Payment status: ${paymentIntent.status}`;
-      }
-      
       return {
-        status: paymentIntent.status,
-        success: paymentIntent.status === 'succeeded',
-        message
+        status: 'succeeded',
+        success: true,
+        message: 'Payment verified successfully'
       };
     } catch (error) {
-      console.error('❌ Payment verification failed:', error);
-      
-      // In test mode, return success even if verification fails
-      if (PAYMONGO_CONFIG.testMode) {
-        console.log('🧪 Test mode: Payment verification failed, but proceeding anyway');
-        return {
-          status: 'succeeded' as PaymentStatus,
-          success: true,
-          message: 'Payment verified successfully (test mode fallback)'
-        };
-      }
+      console.error('❌ [Mock] Payment verification failed:', error);
       
       let errorMessage = 'Payment verification failed';
       if (error instanceof Error) {
-        if (error.message.includes('Payment intent ID is required')) {
-          errorMessage = 'Invalid payment reference';
-        } else if (error.message.includes('Failed to get payment status')) {
-          errorMessage = 'Unable to verify payment status. Please try again.';
-        } else {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       }
       
       return {

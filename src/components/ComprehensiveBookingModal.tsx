@@ -85,7 +85,7 @@ const ComprehensiveBookingModal: React.FC<ComprehensiveBookingModalProps> = ({
       }
 
       console.log('✅ Checkout session created successfully');
-      console.log('🔗 Redirecting to PayMongo checkout...');
+      console.log('🔗 Processing payment checkout...');
 
       // Store booking data in localStorage for after payment
       const bookingDataToStore = {
@@ -116,7 +116,7 @@ const ComprehensiveBookingModal: React.FC<ComprehensiveBookingModalProps> = ({
 
       localStorage.setItem('pendingBooking', JSON.stringify(bookingDataToStore));
 
-      // Redirect to PayMongo checkout
+      // Redirect to payment success page
       window.location.href = paymentResult.checkoutUrl;
 
     } catch (error) {
@@ -385,7 +385,7 @@ const ComprehensiveBookingModal: React.FC<ComprehensiveBookingModalProps> = ({
             {/* Security Notice */}
             <div className="security-notice">
               <span className="security-icon">🔒</span>
-              <span>Your payment is secured by PayMongo. We never store your payment details.</span>
+              <span>Your payment is secure. We never store your payment details.</span>
             </div>
 
             {/* Policy Warning */}

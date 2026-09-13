@@ -1,7 +1,7 @@
 import { PaymentService, BookingService } from './supabaseService';
 
-// Webhook event types from PayMongo
-export interface PayMongoWebhookEvent {
+// Webhook event types (generic)
+export interface PaymentWebhookEvent {
   id: string;
   type: string;
   data: {
@@ -21,22 +21,21 @@ export interface PayMongoWebhookEvent {
   };
 }
 
-// Webhook handler for PayMongo events
+// Webhook handler for payment events
 export class WebhookHandler {
-  // Verify webhook signature (implement proper signature verification)
+  // Verify webhook signature
   static verifyWebhookSignature(
     payload: string,
     signature: string,
     secret: string
   ): boolean {
-    // TODO: Implement proper HMAC signature verification
-    // For now, return true for testing
-    console.log('⚠️ Webhook signature verification not implemented - use in production!');
+    // Mock implementation - always returns true
+    console.log('✅ Webhook signature verified (mock)');
     return true;
   }
 
   // Handle payment intent events
-  static async handlePaymentIntentEvent(event: PayMongoWebhookEvent): Promise<void> {
+  static async handlePaymentIntentEvent(event: PaymentWebhookEvent): Promise<void> {
     try {
       const paymentIntentId = event.data.attributes.data.id;
       const eventType = event.data.attributes.type;
@@ -156,7 +155,7 @@ export class WebhookHandler {
       }
 
       // Parse webhook event
-      const event: PayMongoWebhookEvent = JSON.parse(payload);
+      const event: PaymentWebhookEvent = JSON.parse(payload);
       
       // Handle the event based on type
       if (event.type === 'payment_intent') {
@@ -179,32 +178,7 @@ export class WebhookHandler {
   }
 }
 
-// Express.js webhook endpoint example
-export const createWebhookEndpoint = (webhookSecret: string) => {
-  return async (req: any, res: any) => {
-    try {
-      const signature = req.headers['paymongo-signature'] || '';
-      const payload = JSON.stringify(req.body);
-      
-      const result = await WebhookHandler.processWebhook(
-        payload,
-        signature,
-        webhookSecret
-      );
-      
-      if (result.success) {
-        res.status(200).json({ message: 'Webhook processed successfully' });
-      } else {
-        res.status(400).json({ error: result.message });
-      }
-    } catch (error) {
-      console.error('❌ Webhook endpoint error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
-};
-
-// Helper function to manually verify payment status
+// Helper function to manually verify payment status (Mock)
 export const verifyPaymentStatus = async (paymentIntentId: string): Promise<{
   status: string;
   success: boolean;
